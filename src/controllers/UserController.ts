@@ -2,17 +2,11 @@ import User from '../models/userModel';
 import JWT from 'jsonwebtoken';
 import {Request, Response} from 'express';
 import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
+import { Types } from 'mongoose';
 
 dotenv.config();
 
-export const users = async (req: Request, res: Response)=>{
-    try {
-        let users = await User.find({});
-        res.json(users)
-    } catch (error) {
-        res.json({message: error})
-    }
-};
 
 export const register = async(req: Request, res:Response)=>{
     if(req.body.email && req.body.password){
@@ -20,7 +14,7 @@ export const register = async(req: Request, res:Response)=>{
 
         let hasUser = await User.findOne({ email });
         if(!hasUser){
-            let newUser = await User.create({name, email, password});
+            let newUser = await User.create({name, email, password: await bcrypt.hash(password, 10)});
 
             const token = JWT.sign(
                 { id: newUser._id, name: newUser.name, email: newUser.email },
@@ -28,6 +22,7 @@ export const register = async(req: Request, res:Response)=>{
                 )
 
             res.status(201).json({id: newUser._id, token})
+            return;
         }else{
             res.json('Email já existe')
         }
@@ -40,15 +35,19 @@ export const register = async(req: Request, res:Response)=>{
 export const login = async(req: Request, res: Response)=>{
     if(req.body.email && req.body.password){
         let {email, password} = req.body;
-        let user = await User.findOne({ email, password});
+        let user = await User.findOne({ email });
 
         if(user){
-            const token = JWT.sign(
-                { id: user._id, name: user.name, email: user.email },
-                process.env.JWT_SECRET_KEY as string
-            )
-            res.json({status: true, token})
-            return;
+            if(await bcrypt.compare(password, user.password)){
+                const token = JWT.sign(
+                    { id: user._id, name: user.name, email: user.email },
+                    process.env.JWT_SECRET_KEY as string, 
+                    {expiresIn: '6h'}
+                )
+                res.json({status: true, token})
+                return;
+            }
+            
         }
 
     }

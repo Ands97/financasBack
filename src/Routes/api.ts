@@ -1,28 +1,19 @@
 import { Router } from "express";
-import * as UserController from '../controllers/UserController';
-import * as ProductController from '../controllers/ProductController'
 import {Auth} from '../middlewares/auth';
-import multer from "multer";
+import * as UserController from '../controllers/UserController';
+import * as TransactionController from '../controllers/TransactionController';
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb)=>{
-        cb(null, './tmp');
-    },
-    filename: (req, file, cb)=>{
-        cb(null, `${file.fieldname}${Date.now()}.jpg`)
-    }
-})
-
-const upload = multer({
-    storage
-})
 
 const router = Router();
 
-
+//UserController
 router.post('/register', UserController.register);
 router.post('/login', UserController.login);
-router.get('/users', Auth.private, UserController.users);
-router.post('/upload', upload.array('productImages', 3) ,ProductController.uploadFiles);
+//TransactionController
+router.post('/transaction/', Auth.private, TransactionController.create);
+router.get('/statement', Auth.private, TransactionController.getStatement);
+router.get('/transactions/:date', Auth.private, TransactionController.getStatementForMonth);
+
+
 
 export default router;
