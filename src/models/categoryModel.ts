@@ -1,21 +1,20 @@
 import { Schema, model, ObjectId} from "mongoose";
 
 type CategoryType = {
-   category: [string],
-   transactionId: ObjectId
+   category: string,
+   userId: ObjectId
 }
 
 const CategorySchema = new Schema<CategoryType>({
-    category: [{
+    category: {
         type: String,
-        required: true,
-        default: 'outros'
-    }],
-    transactionId: {
+        required: true
+    },
+    userId:{
         type: Schema.Types.ObjectId,
-        ref: 'Transaction'
+        ref: 'User',
+        required: true
     }
-
 },
     {timestamps: true});
 

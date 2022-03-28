@@ -1,21 +1,21 @@
 import { Schema, model, ObjectId} from "mongoose";
 
 type TransactionType = {
-   transactionType: string,
+   transactionType: boolean,
    transactionDescription: string,
    transactionValue: number,
    transactionDay: string,
    transactionMonth: string,
    transactionYear: string,
    transactionStatus: boolean,
-   transactionCategory: [ObjectId],
-   transactionAccount: [ObjectId],
+   transactionCategory: ObjectId,
+   transactionAccount: ObjectId,
    userId: ObjectId
 }
 
 const transactionSchema = new Schema<TransactionType>({
     transactionType: {
-        type: String, 
+        type: Boolean, 
         required: true
     },
     transactionDescription: {
@@ -42,16 +42,16 @@ const transactionSchema = new Schema<TransactionType>({
         type: Boolean,
         required: true
     },
-    transactionCategory:[{
+    transactionCategory:{
         type: Schema.Types.ObjectId,
         ref: 'Category',
         required: true
-    }],
-    transactionAccount:[{
+    },
+    transactionAccount:{
         type: Schema.Types.ObjectId,
         ref: 'Account',
         required: true
-    }],
+    },
     userId:{
         type: Schema.Types.ObjectId,
         ref: 'User',

@@ -16,32 +16,21 @@ interface TokenPayload{
 
 export const Auth = {
     private: async(req: Request, res: Response, next: NextFunction) =>{
-        let sucess = false;
-
         if(req.headers.authorization){
 
             const [authType, token] = req.headers.authorization.split(' ');
             if(authType === "Bearer"){
-
                 try {
                     const data = JWT.verify(token, process.env.JWT_SECRET_KEY as string)
                     const {id} = data as TokenPayload
                     req.userId = id
 
-                    sucess = true 
+                    return next()
                 } catch (error) {
                     res.status(403)
                         .json({error:"Unauthorized"})
                 }
-                
             }
-
-        }
-        if(sucess){
-            next()
-        }else{
-            res.status(403)
-                .json({error:'Não autorizado!'})
         }
     }
 }

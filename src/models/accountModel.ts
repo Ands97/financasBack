@@ -1,21 +1,20 @@
 import { Schema, model, ObjectId} from "mongoose";
 
 type AccountType = {
-   account: [string],
-   transactionId: ObjectId
+   account: string,
+   userId: ObjectId
 }
 
 const AccountSchema = new Schema<AccountType>({
-    account: [{
+    account: {
         type: String,
-        required: true,
-        default: 'carteira'
-    }],
-    transactionId: {
+        required: true
+    }, 
+    userId:{
         type: Schema.Types.ObjectId,
-        ref: 'Transaction'
+        ref: 'User',
+        required: true
     }
-
 },
     {timestamps: true});
 

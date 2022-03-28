@@ -36,15 +36,15 @@ export const login = async(req: Request, res: Response)=>{
     if(req.body.email && req.body.password){
         let {email, password} = req.body;
         let user = await User.findOne({ email });
-
+        let username = user?.name;
         if(user){
             if(await bcrypt.compare(password, user.password)){
                 const token = JWT.sign(
                     { id: user._id, name: user.name, email: user.email },
                     process.env.JWT_SECRET_KEY as string, 
-                    {expiresIn: '6h'}
+                    {expiresIn: '24h'}
                 )
-                res.json({status: true, token})
+                res.json({status: true, token, username})
                 return;
             }
             
