@@ -3,21 +3,15 @@ import Transaction from '../models/transactionModel';
 
 export const create = async (req: Request, res: Response)=>{
     try {
-        const { type, description, value, date, Tstatus, category, account} = req.body;
+        const { type, description, value, date, paymentDate, Tstatus, category, account} = req.body;
         
-
-        const dateReceived = new Date(date);
-        const month = String(dateReceived.getMonth()+1);
-        const year = String(dateReceived.getFullYear());
-        const day = String(dateReceived.getDate()+1);
 
         const newTransaction = await Transaction.create({
             transactionType: type,
             transactionDescription: description,
             transactionValue: value,
-            transactionDay: day,
-            transactionMonth: month,
-            transactionYear: year,
+            transactionDate: date,
+            transactionPaymentDate: paymentDate,
             transactionStatus: Tstatus,
             transactionCategory: category,
             transactionAccount: account,
@@ -33,7 +27,7 @@ export const create = async (req: Request, res: Response)=>{
 export const getStatementResume = async (req: Request, res: Response)=>{
     try{
         const list = await Transaction.find({userId: req.userId,
-            transactionStatus: true}).limit(5)
+            transactionStatus: true}).limit(5).sort({transactionPaymentDate: -1})
         res.json(list)
     }catch(err){
         res.status(404)
@@ -68,20 +62,16 @@ export const getExpense = async (req: Request, res: Response) => {
 }
 
 export const getStatementForMonth = async (req: Request, res: Response) =>{
-    const date = new Date(req.params.date)
+    const date = new Date(req.body.date)
     if(date){
-        const month = String(date.getMonth())
-        const year = String(date.getFullYear())
-
         try {
-            const statementForMonth = await Transaction.find({transactionMonth: month,
-                transactionYear: year
-            })
+            const statementForMonth = await Transaction.find({transactionPaymentDate: date})
             res.json({statementForMonth})
         } catch (error) {
             res.status(404)
         }
-      
+    }else{
+        res.json({})
     }
 
 }

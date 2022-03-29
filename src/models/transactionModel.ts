@@ -4,12 +4,11 @@ type TransactionType = {
    transactionType: boolean,
    transactionDescription: string,
    transactionValue: number,
-   transactionDay: string,
-   transactionMonth: string,
-   transactionYear: string,
+   transactionDate: string,
+   transactionPaymentDate: string,
    transactionStatus: boolean,
-   transactionCategory: ObjectId,
-   transactionAccount: ObjectId,
+   transactionCategory: string,
+   transactionAccount: string,
    userId: ObjectId
 }
 
@@ -26,30 +25,23 @@ const transactionSchema = new Schema<TransactionType>({
         type: Number, 
         required: true
     },
-    transactionDay:{
+    transactionDate:{
         type: String, 
         required: true
     },
-    transactionMonth:{
-        type: String, 
-        required: true
-    },
-    transactionYear:{
-        type: String, 
-        required: true
+    transactionPaymentDate: {
+        type: String,
     },
     transactionStatus:{
         type: Boolean,
         required: true
     },
     transactionCategory:{
-        type: Schema.Types.ObjectId,
-        ref: 'Category',
+        type: String,
         required: true
     },
     transactionAccount:{
-        type: Schema.Types.ObjectId,
-        ref: 'Account',
+        type: String,
         required: true
     },
     userId:{
