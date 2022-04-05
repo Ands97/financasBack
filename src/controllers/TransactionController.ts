@@ -22,7 +22,7 @@ export const create = async (req: Request, res: Response)=>{
         res.status(403).send(error);
         
     }
-}
+};
 
 export const getStatementResume = async (req: Request, res: Response)=>{
     try{
@@ -32,7 +32,7 @@ export const getStatementResume = async (req: Request, res: Response)=>{
     }catch(err){
         res.status(404)
     }
-}
+};
 
 export const getIcome = async (req: Request, res: Response)=>{
     try {
@@ -46,7 +46,7 @@ export const getIcome = async (req: Request, res: Response)=>{
         res.status(404).json(error)
     }
     
-}
+};
 
 export const getExpense = async (req: Request, res: Response) => {
     try {
@@ -59,28 +59,223 @@ export const getExpense = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(404).json(error)
     }
-}
+};
 
 export const getStatementForMonth = async (req: Request, res: Response) =>{
-    const date = new Date(req.body.date)
-    if(date){
+
+    const date = req.body.date;
+    const firstDate = `${date}-01`;
+    const lastDate = `${date}-31`;
+    const {account, category} = req.body;
+
+    if(category === 'Todas as Categorias' && account !== 'Todas as Contas'){
+        if(date && account){
+            try {
+                const statementForMonth = await Transaction.find({
+                    userId: req.userId, 
+                    transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                    transactionAccount: account
+                })
+                res.json(statementForMonth);
+            } catch (error) {
+                res.status(404).json(error)
+            }
+        }
+    }else if(account === 'Todas as Contas' && category !== 'Todas as Categorias'){
+        if(date && category){
+            try {
+                const statementForMonth = await Transaction.find({
+                    userId: req.userId, 
+                    transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                    transactionCategory: category
+                })
+                res.json(statementForMonth)
+            } catch (error) {
+                res.status(404).json(error)
+            }
+        }
+    }else if(account === 'Todas as Contas' && category === 'Todas as Categorias'){
         try {
-            const statementForMonth = await Transaction.find({transactionPaymentDate: date})
-            res.json({statementForMonth})
+            const statementForMonth = await Transaction.find({
+                userId: req.userId, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+            })
+            res.json(statementForMonth)
         } catch (error) {
-            res.status(404)
+            res.status(404).json(error)
+        }
+    }
+    else{
+        try {
+            const statementForMonth = await Transaction.find({
+                useId: req.userId,
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionAccount: account,
+                transactionCategory: category
+            })
+            res.json(statementForMonth)
+        } catch (error) {
+            res.status(404).json(error)
+        }
+    }
+};
+
+export const getIncomeForMonth = async (req: Request, res: Response) => {
+    const date = req.body.date;
+    const firstDate = `${date}-01`;
+    const lastDate = `${date}-31`;
+    const {account, category} = req.body;
+    if(category === 'Todas as Categorias' && account !== 'Todas as Contas'){
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: true,
+                transactionAccount: account
+            });
+            
+            const income = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            res.json(income)
+            console.log(income)
+            
+        } catch (error) {
+            res.status(404).json(error)
+        }
+    }else if(account === 'Todas as Contas' && category !== 'Todas as Categorias'){
+        try {
+            const listIncome = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: true,
+                transactionCategory: category
+            });
+            const listExpense = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: false,
+                transactionCategory: category
+            });
+            let income = listIncome.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            let expense = listExpense.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            res.json({income, expense})
+        } catch (error) {
+            res.json(error)
+        }
+    }else if(account === 'Todas as Contas' && category === 'Todas as Categorias'){
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: true,
+            });
+            const income = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            res.json(income)
+        } catch (error) {
+            res.status(404).json(error)
         }
     }else{
-        res.json({})
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: true,
+                transactionAccount: account,
+                transactionCategory: category
+            });
+            const income = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            res.json(income)
+        } catch (error) {
+            res.status(404).json(error)
+        }
     }
+    
+};
 
-}
+//Expense
 
-const isOwner = (user: any, list: any) => {
-    if(JSON.stringify(user._id) === JSON.stringify(list.userId)){
-        return true;
-    }   
-    else{
-        return false; 
+export const getExpenseForMonth = async (req: Request, res: Response) => {
+    const date = req.body.date;
+    const firstDate = `${date}-01`;
+    const lastDate = `${date}-31`;
+    const {account, category} = req.body;
+    if(category === 'Todas as Categorias' && account !== 'Todas as Contas'){
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: false,
+                transactionAccount: account
+            });
+            const expense = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            if(expense){
+                res.json(expense)
+            }else{
+                res.json(0)
+            }
+        } catch (error) {
+            res.status(404).json(error)
+        }
+    }else if(account === 'Todas as Contas' && category !== 'Todas as Categorias'){
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: false,
+                transactionCategory: category
+            });
+            const expense = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            if(expense){
+                res.json(expense)
+            }else{
+                res.json('0,00')
+            }
+        } catch (error) {
+            res.status(404).json(error)
+        }
+    }else if(account === 'Todas as Contas' && category === 'Todas as Categorias'){
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: false,
+            });
+            const expense = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            if(expense){
+                res.json(expense)
+            }else{
+                res.json('0,00')
+            }
+        } catch (error) {
+            res.status(404).json(error)
+        }
+    }else{
+        try {
+            const list = await Transaction.find({
+                userId: req.userId,
+                transactionStatus: true, 
+                transactionPaymentDate: {$gte: firstDate, $lte: lastDate},
+                transactionType: false,
+                transactionAccount: account,
+                transactionCategory: category
+            });
+            const expense = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+            if(expense){
+                res.json(expense)
+            }else{
+                res.json('0,00')
+            }
+            
+        } catch (error) {
+            res.status(404).json(error)
+        }
     }
-}
+    
+};

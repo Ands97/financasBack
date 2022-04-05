@@ -15,9 +15,11 @@ router.post('/login', UserController.login);
 //TransactionController
 router.post('/transaction', Auth.private, TransactionController.create);
 router.get('/statementResume', Auth.private, TransactionController.getStatementResume);
-router.get('/transactions/:date', Auth.private, TransactionController.getStatementForMonth);
+router.post('/statementMonth', Auth.private, TransactionController.getStatementForMonth);
 router.get('/income', Auth.private, TransactionController.getIcome);
 router.get('/expense', Auth.private, TransactionController.getExpense);
+router.post('/statementIncome', Auth.private, TransactionController.getIncomeForMonth);
+router.post('/statementExpense', Auth.private, TransactionController.getExpenseForMonth);
 
 //AccountController
 router.post('/account', Auth.private, AccountController.create);
