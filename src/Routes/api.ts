@@ -20,6 +20,8 @@ router.get('/income', Auth.private, TransactionController.getIcome);
 router.get('/expense', Auth.private, TransactionController.getExpense);
 router.post('/statementIncome', Auth.private, TransactionController.getIncomeForMonth);
 router.post('/statementExpense', Auth.private, TransactionController.getExpenseForMonth);
+router.post('/incomeProfit', Auth.private, TransactionController.getIncomeProfit);
+router.post('/expenseProfit', Auth.private, TransactionController.getExpenseProfit);
 
 //AccountController
 router.post('/account', Auth.private, AccountController.create);
