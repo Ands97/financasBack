@@ -9,7 +9,9 @@ dotenv.config()
 mongoConnect();
 const server = express();
 
-server.use(cors({}));
+server.use(cors({
+    origin: 'https://yourmoneydotcom.herokuapp.com'
+}));
 server.use(express.static(path.join(__dirname, '../public')));
 server.use(express.json())
 server.use(express.urlencoded({extended: true}));
