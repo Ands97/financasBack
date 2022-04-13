@@ -3,12 +3,27 @@ import Category from '../models/categoryModel';
 
 export const create = async (req: Request, res: Response) => {
     try {   
-        const newAccount = await Category.create({category: req.body.title, userId: req.userId});
-        res.json(newAccount)
+        const newCategory = await Category.create({category: req.body.title, userId: req.userId});
+        res.json(newCategory)
     } catch (error) {
         res.json({error})
     }
 };
+
+export const createSubCat = async (req: Request, res: Response) => {
+    try{
+        const id = req.params.id
+        const subCat =  req.body.subCat
+
+        const newSubCat = await Category.updateOne(
+            {_id: id},
+            {$push: { subCategory: subCat } }       
+        )
+        res.json(newSubCat)
+    }catch (error){
+        res.json(error)
+    }
+}
 
 export const getCategories = async (req: Request, res: Response) => {
     try{ 

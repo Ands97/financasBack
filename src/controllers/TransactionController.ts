@@ -366,4 +366,88 @@ export const getExpenseProfit = async (req: Request, res: Response) => {
     }
 }
 
+
+//Bills to pay
+
+export const billsToPay = async (req: Request, res: Response) => {
+    try{
+        const list = await Transaction.find({
+            userId: req.userId,
+            transactionStatus: false,
+            transactionType: 'expense'
+        }).sort({transactionDate: -1})
+        res.json(list)
+    }catch(error) {
+        res.json(error)
+    }
+}
+
+export const updateBillsToPay = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const {value, account, Tstatus, paymentDate} = req.body;
+    if(value && account && Tstatus && paymentDate){
+        try {
+            const updated = await Transaction.updateOne(
+                { _id: id },
+                {
+                    transactionValue: value,
+                    transactionAccount: account,
+                    transactionStatus: Tstatus,
+                    transactionPaymentDate: paymentDate
+                }
+            )
+            res.json(updated)
+        } catch (error) {
+            res.json(error)
+        }
+    }
+}
+
+
+//BillsToReceive
+
+export const billsToReceive = async (req: Request, res: Response) => {
+    try{
+        const list = await Transaction.find({
+            userId: req.userId,
+            transactionStatus: false,
+            transactionType: 'income'
+        }).sort({transactionDate: -1})
+        res.json(list)
+    }catch(error) {
+        res.json(error)
+    }
+}
+
+
+export const updateBillsToReceive = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const {value, account, Tstatus, paymentDate} = req.body;
+    if(value && account && Tstatus && paymentDate){
+        try {
+            const updated = await Transaction.updateOne(
+                { _id: id },
+                {
+                    transactionValue: value,
+                    transactionAccount: account,
+                    transactionStatus: Tstatus,
+                    transactionPaymentDate: paymentDate
+                }
+            )
+            res.json(updated)
+        } catch (error) {
+            res.json(error)
+        }
+    }
+}
     
+
+export const billsId = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    try {
+        const list = await Transaction.findById({_id: id})
+        res.json(list)
+    } catch (error) {
+        res.json(error)
+    }
+}

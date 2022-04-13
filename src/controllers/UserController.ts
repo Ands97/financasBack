@@ -21,7 +21,7 @@ export const register = async(req: Request, res:Response)=>{
                 process.env.JWT_SECRET_KEY as string
                 )
 
-            res.status(201).json({id: newUser._id, token})
+            res.status(201).json({token, name})
             return;
         }else{
             res.json('Email já existe')
