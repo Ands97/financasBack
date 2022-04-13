@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExpenseProfit = exports.getIncomeProfit = exports.getExpenseForMonth = exports.getIncomeForMonth = exports.getStatementForMonth = exports.getExpense = exports.getIcome = exports.getStatementResume = exports.create = void 0;
+exports.billsId = exports.updateBillsToReceive = exports.billsToReceive = exports.updateBillsToPay = exports.billsToPay = exports.getExpenseProfit = exports.getIncomeProfit = exports.getExpenseForMonth = exports.getIncomeForMonth = exports.getStatementForMonth = exports.getExpense = exports.getIcome = exports.getStatementResume = exports.create = void 0;
 const transactionModel_1 = __importDefault(require("../models/transactionModel"));
 const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -386,3 +386,82 @@ const getExpenseProfit = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getExpenseProfit = getExpenseProfit;
+//Bills to pay
+const billsToPay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const list = yield transactionModel_1.default.find({
+            userId: req.userId,
+            transactionStatus: false,
+            transactionType: 'expense'
+        }).sort({ transactionDate: -1 });
+        res.json(list);
+    }
+    catch (error) {
+        res.json(error);
+    }
+});
+exports.billsToPay = billsToPay;
+const updateBillsToPay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const { value, account, Tstatus, paymentDate } = req.body;
+    if (value && account && Tstatus && paymentDate) {
+        try {
+            const updated = yield transactionModel_1.default.updateOne({ _id: id }, {
+                transactionValue: value,
+                transactionAccount: account,
+                transactionStatus: Tstatus,
+                transactionPaymentDate: paymentDate
+            });
+            res.json(updated);
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }
+});
+exports.updateBillsToPay = updateBillsToPay;
+//BillsToReceive
+const billsToReceive = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const list = yield transactionModel_1.default.find({
+            userId: req.userId,
+            transactionStatus: false,
+            transactionType: 'income'
+        }).sort({ transactionDate: -1 });
+        res.json(list);
+    }
+    catch (error) {
+        res.json(error);
+    }
+});
+exports.billsToReceive = billsToReceive;
+const updateBillsToReceive = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    const { value, account, Tstatus, paymentDate } = req.body;
+    if (value && account && Tstatus && paymentDate) {
+        try {
+            const updated = yield transactionModel_1.default.updateOne({ _id: id }, {
+                transactionValue: value,
+                transactionAccount: account,
+                transactionStatus: Tstatus,
+                transactionPaymentDate: paymentDate
+            });
+            res.json(updated);
+        }
+        catch (error) {
+            res.json(error);
+        }
+    }
+});
+exports.updateBillsToReceive = updateBillsToReceive;
+const billsId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = req.params.id;
+    try {
+        const list = yield transactionModel_1.default.findById({ _id: id });
+        res.json(list);
+    }
+    catch (error) {
+        res.json(error);
+    }
+});
+exports.billsId = billsId;

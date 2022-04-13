@@ -25,7 +25,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!hasUser) {
             let newUser = yield userModel_1.default.create({ name, email, password: yield bcrypt_1.default.hash(password, 10) });
             const token = jsonwebtoken_1.default.sign({ id: newUser._id, name: newUser.name, email: newUser.email }, process.env.JWT_SECRET_KEY);
-            res.status(201).json({ id: newUser._id, token });
+            res.status(201).json({ token, name });
             return;
         }
         else {

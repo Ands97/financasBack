@@ -43,6 +43,14 @@ router.post('/statementIncome', auth_1.Auth.private, TransactionController.getIn
 router.post('/statementExpense', auth_1.Auth.private, TransactionController.getExpenseForMonth);
 router.post('/incomeProfit', auth_1.Auth.private, TransactionController.getIncomeProfit);
 router.post('/expenseProfit', auth_1.Auth.private, TransactionController.getExpenseProfit);
+//billsToPay
+router.get('/billsToPay', auth_1.Auth.private, TransactionController.billsToPay);
+router.put('/billsToPay/:id', auth_1.Auth.private, TransactionController.updateBillsToPay);
+//billsToReceive
+router.get('/billsToReceive', auth_1.Auth.private, TransactionController.billsToReceive);
+router.put('/billsToReceive/:id', auth_1.Auth.private, TransactionController.updateBillsToReceive);
+//bills general
+router.get('/bills/:id', auth_1.Auth.private, TransactionController.billsId);
 //AccountController
 router.post('/account', auth_1.Auth.private, AccountController.create);
 router.get('/account', auth_1.Auth.private, AccountController.getAccounts);
@@ -51,6 +59,7 @@ router.put('/account/:id', auth_1.Auth.private, AccountController.updateAccount)
 router.delete('/account/:id', auth_1.Auth.private, AccountController.deleteAccount);
 //CategoryController
 router.post('/category', auth_1.Auth.private, CategoryController.create);
+router.put('/subcategory/:id', auth_1.Auth.private, CategoryController.createSubCat);
 router.get('/categories', auth_1.Auth.private, CategoryController.getCategories);
 router.get('/category/:id', auth_1.Auth.private, CategoryController.getCategoryId);
 router.put('/category/:id', auth_1.Auth.private, CategoryController.updateCategory);
