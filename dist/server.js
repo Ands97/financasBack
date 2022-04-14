@@ -12,8 +12,7 @@ const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 (0, mongo_1.mongoConnect)();
 const server = (0, express_1.default)();
-server.use((0, cors_1.default)());
-//origin: 'https://yourmoneydotcom.herokuapp.com'
+server.use((0, cors_1.default)({ origin: 'https://yourmoneydotcom.herokuapp.com' }));
 server.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
 server.use(express_1.default.json());
 server.use(express_1.default.urlencoded({ extended: true }));
