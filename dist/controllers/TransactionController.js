@@ -82,8 +82,16 @@ const getIcome = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             transactionStatus: true,
             transactionType: 'income'
         });
+        const secondList = yield transactionModel_1.default.find({
+            userId: req.userId,
+            transactionStatus: true,
+            transactionType: 'income',
+            transactionCategory: 'transfer'
+        });
         const income = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
-        res.json(income);
+        const transferIncome = secondList.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+        const result = income - transferIncome;
+        res.json(result);
     }
     catch (error) {
         res.status(404).json(error);
@@ -97,8 +105,16 @@ const getExpense = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             transactionStatus: true,
             transactionType: 'expense'
         });
+        const secondList = yield transactionModel_1.default.find({
+            userId: req.userId,
+            transactionStatus: true,
+            transactionType: 'expense',
+            transactionCategory: 'transfer'
+        });
         const expense = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
-        res.json(expense);
+        const transferExpense = secondList.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+        const result = expense - transferExpense;
+        res.json(result);
     }
     catch (error) {
         res.status(404).json(error);
@@ -393,7 +409,7 @@ const billsToPay = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             userId: req.userId,
             transactionStatus: false,
             transactionType: 'expense'
-        }).sort({ transactionDate: -1 });
+        }).sort({ transactionDate: 1 });
         res.json(list);
     }
     catch (error) {

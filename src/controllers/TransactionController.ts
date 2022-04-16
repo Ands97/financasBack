@@ -77,9 +77,18 @@ export const getIcome = async (req: Request, res: Response)=>{
         const list = await Transaction.find({
             userId: req.userId,
             transactionStatus: true, 
-            transactionType: 'income'});
+            transactionType: 'income'
+        });
+        const secondList = await Transaction.find({
+            userId: req.userId,
+            transactionStatus: true, 
+            transactionType: 'income',
+            transactionCategory: 'transfer'
+        });
         const income = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
-        res.json(income)
+        const transferIncome = secondList.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+        const result = income - transferIncome
+        res.json(result)
     } catch (error) {
         res.status(404).json(error)
     }
@@ -91,9 +100,18 @@ export const getExpense = async (req: Request, res: Response) => {
         const list = await Transaction.find({
             userId: req.userId,
             transactionStatus: true, 
-            transactionType: 'expense'});
+            transactionType: 'expense'
+        });
+        const secondList = await Transaction.find({
+            userId: req.userId,
+            transactionStatus: true, 
+            transactionType: 'expense',
+            transactionCategory: 'transfer'
+        });
         const expense = list.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
-        res.json(expense)
+        const transferExpense = secondList.map((item)=>(item.transactionValue)).reduce((total, item)=> total += item)
+        const result = expense - transferExpense
+        res.json(result)
     } catch (error) {
         res.status(404).json(error)
     }
@@ -375,7 +393,7 @@ export const billsToPay = async (req: Request, res: Response) => {
             userId: req.userId,
             transactionStatus: false,
             transactionType: 'expense'
-        }).sort({transactionDate: -1})
+        }).sort({transactionDate: 1})
         res.json(list)
     }catch(error) {
         res.json(error)
