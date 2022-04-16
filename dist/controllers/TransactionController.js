@@ -16,10 +16,10 @@ exports.billsId = exports.updateBillsToReceive = exports.billsToReceive = export
 const transactionModel_1 = __importDefault(require("../models/transactionModel"));
 const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { type, description, value, date, paymentDate, Tstatus, category, account, acountDestination } = req.body;
-        if (type === 'transfer') {
+        const { type, description, value, date, paymentDate, Tstatus, category, account, acountDestination, } = req.body;
+        if (type === "transfer") {
             const transactionIncome = yield transactionModel_1.default.create({
-                transactionType: 'income',
+                transactionType: "income",
                 transactionDescription: description,
                 transactionValue: value,
                 transactionDate: date,
@@ -27,10 +27,10 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 transactionStatus: Tstatus,
                 transactionCategory: category,
                 transactionAccount: acountDestination,
-                userId: req.userId
+                userId: req.userId,
             });
             const transactionExpense = yield transactionModel_1.default.create({
-                transactionType: 'expense',
+                transactionType: "expense",
                 transactionDescription: description,
                 transactionValue: value,
                 transactionDate: date,
@@ -38,7 +38,7 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 transactionStatus: Tstatus,
                 transactionCategory: category,
                 transactionAccount: account,
-                userId: req.userId
+                userId: req.userId,
             });
             res.status(201).json({ transactionIncome, transactionExpense });
         }
@@ -52,7 +52,7 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 transactionStatus: Tstatus,
                 transactionCategory: category,
                 transactionAccount: account,
-                userId: req.userId
+                userId: req.userId,
             });
             res.status(201).json({ newTransaction });
         }
@@ -66,8 +66,10 @@ const getStatementResume = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const list = yield transactionModel_1.default.find({
             userId: req.userId,
-            transactionStatus: true
-        }).limit(5).sort({ transactionPaymentDate: -1 });
+            transactionStatus: true,
+        })
+            .limit(5)
+            .sort({ transactionPaymentDate: -1 });
         res.json(list);
     }
     catch (err) {
@@ -80,18 +82,30 @@ const getIcome = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const list = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: true,
-            transactionType: 'income'
+            transactionType: "income",
         });
         const secondList = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: true,
-            transactionType: 'income',
-            transactionCategory: 'transfer'
+            transactionType: "income",
+            transactionCategory: "transfer",
         });
-        const income = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
-        const transferIncome = secondList.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
-        const result = income - transferIncome;
-        res.json(result);
+        if (secondList[0]) {
+            let income = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
+            let transferIncome = secondList
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
+            let result = income - transferIncome;
+            res.json(result);
+        }
+        else {
+            const income = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
+            res.json(income);
+        }
     }
     catch (error) {
         res.status(404).json(error);
@@ -103,18 +117,30 @@ const getExpense = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const list = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: true,
-            transactionType: 'expense'
+            transactionType: "expense",
         });
         const secondList = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: true,
-            transactionType: 'expense',
-            transactionCategory: 'transfer'
+            transactionType: "expense",
+            transactionCategory: "transfer",
         });
-        const expense = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
-        const transferExpense = secondList.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
-        const result = expense - transferExpense;
-        res.json(result);
+        if (secondList[0]) {
+            let expense = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
+            let transferExpense = secondList
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
+            let result = expense - transferExpense;
+            res.json(result);
+        }
+        else {
+            let expense = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
+            res.json(expense);
+        }
     }
     catch (error) {
         res.status(404).json(error);
@@ -126,13 +152,13 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
     const firstDate = `${date}-01`;
     const lastDate = `${date}-31`;
     const { account, category } = req.body;
-    if (category === 'Todas as Categorias' && account !== 'Todas as Contas') {
+    if (category === "Todas as Categorias" && account !== "Todas as Contas") {
         if (date && account) {
             try {
                 const statementForMonth = yield transactionModel_1.default.find({
                     userId: req.userId,
                     transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                    transactionAccount: account
+                    transactionAccount: account,
                 }).sort({ transactionPaymentDate: -1 });
                 res.json(statementForMonth);
             }
@@ -141,13 +167,14 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
             }
         }
     }
-    else if (account === 'Todas as Contas' && category !== 'Todas as Categorias') {
+    else if (account === "Todas as Contas" &&
+        category !== "Todas as Categorias") {
         if (date && category) {
             try {
                 const statementForMonth = yield transactionModel_1.default.find({
                     userId: req.userId,
                     transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                    transactionCategory: category
+                    transactionCategory: category,
                 }).sort({ transactionPaymentDate: -1 });
                 res.json(statementForMonth);
             }
@@ -156,7 +183,8 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
             }
         }
     }
-    else if (account === 'Todas as Contas' && category === 'Todas as Categorias') {
+    else if (account === "Todas as Contas" &&
+        category === "Todas as Categorias") {
         try {
             const statementForMonth = yield transactionModel_1.default.find({
                 userId: req.userId,
@@ -174,7 +202,7 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 useId: req.userId,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
                 transactionAccount: account,
-                transactionCategory: category
+                transactionCategory: category,
             }).sort({ transactionPaymentDate: -1 });
             res.json(statementForMonth);
         }
@@ -189,16 +217,18 @@ const getIncomeForMonth = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const firstDate = `${date}-01`;
     const lastDate = `${date}-31`;
     const { account, category } = req.body;
-    if (category === 'Todas as Categorias' && account !== 'Todas as Contas') {
+    if (category === "Todas as Categorias" && account !== "Todas as Contas") {
         try {
             const list = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'income',
-                transactionAccount: account
+                transactionType: "income",
+                transactionAccount: account,
             });
-            const income = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const income = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (income) {
                 res.json(income);
             }
@@ -210,16 +240,19 @@ const getIncomeForMonth = (req, res) => __awaiter(void 0, void 0, void 0, functi
             res.json(0);
         }
     }
-    else if (account === 'Todas as Contas' && category !== 'Todas as Categorias') {
+    else if (account === "Todas as Contas" &&
+        category !== "Todas as Categorias") {
         try {
             const list = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'income',
-                transactionCategory: category
+                transactionType: "income",
+                transactionCategory: category,
             });
-            let income = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            let income = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (income) {
                 res.json(income);
             }
@@ -231,15 +264,18 @@ const getIncomeForMonth = (req, res) => __awaiter(void 0, void 0, void 0, functi
             res.json(0);
         }
     }
-    else if (account === 'Todas as Contas' && category === 'Todas as Categorias') {
+    else if (account === "Todas as Contas" &&
+        category === "Todas as Categorias") {
         try {
             const list = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'income',
+                transactionType: "income",
             });
-            const income = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const income = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (income) {
                 res.json(income);
             }
@@ -257,11 +293,13 @@ const getIncomeForMonth = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'income',
+                transactionType: "income",
                 transactionAccount: account,
-                transactionCategory: category
+                transactionCategory: category,
             });
-            const income = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const income = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (income) {
                 res.json(income);
             }
@@ -281,16 +319,18 @@ const getExpenseForMonth = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const firstDate = `${date}-01`;
     const lastDate = `${date}-31`;
     const { account, category } = req.body;
-    if (category === 'Todas as Categorias' && account !== 'Todas as Contas') {
+    if (category === "Todas as Categorias" && account !== "Todas as Contas") {
         try {
             const list = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'expense',
-                transactionAccount: account
+                transactionType: "expense",
+                transactionAccount: account,
             });
-            const expense = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const expense = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (expense) {
                 res.json(expense);
             }
@@ -302,16 +342,19 @@ const getExpenseForMonth = (req, res) => __awaiter(void 0, void 0, void 0, funct
             res.json(0);
         }
     }
-    else if (account === 'Todas as Contas' && category !== 'Todas as Categorias') {
+    else if (account === "Todas as Contas" &&
+        category !== "Todas as Categorias") {
         try {
             const list = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'expense',
-                transactionCategory: category
+                transactionType: "expense",
+                transactionCategory: category,
             });
-            const expense = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const expense = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (expense) {
                 res.json(expense);
             }
@@ -323,15 +366,18 @@ const getExpenseForMonth = (req, res) => __awaiter(void 0, void 0, void 0, funct
             res.json(0);
         }
     }
-    else if (account === 'Todas as Contas' && category === 'Todas as Categorias') {
+    else if (account === "Todas as Contas" &&
+        category === "Todas as Categorias") {
         try {
             const list = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'expense',
+                transactionType: "expense",
             });
-            const expense = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const expense = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (expense) {
                 res.json(expense);
             }
@@ -349,11 +395,13 @@ const getExpenseForMonth = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 userId: req.userId,
                 transactionStatus: true,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
-                transactionType: 'expense',
+                transactionType: "expense",
                 transactionAccount: account,
-                transactionCategory: category
+                transactionCategory: category,
             });
-            const expense = list.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+            const expense = list
+                .map((item) => item.transactionValue)
+                .reduce((total, item) => (total += item));
             if (expense) {
                 res.json(expense);
             }
@@ -374,10 +422,12 @@ const getIncomeProfit = (req, res) => __awaiter(void 0, void 0, void 0, function
         const listIncome = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: true,
-            transactionType: 'income',
-            transactionAccount: account
+            transactionType: "income",
+            transactionAccount: account,
         });
-        const income = listIncome.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+        const income = listIncome
+            .map((item) => item.transactionValue)
+            .reduce((total, item) => (total += item));
         res.json(income);
     }
     catch (error) {
@@ -391,10 +441,12 @@ const getExpenseProfit = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const listExpense = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: true,
-            transactionType: 'expense',
-            transactionAccount: account
+            transactionType: "expense",
+            transactionAccount: account,
         });
-        const expense = listExpense.map((item) => (item.transactionValue)).reduce((total, item) => total += item);
+        const expense = listExpense
+            .map((item) => item.transactionValue)
+            .reduce((total, item) => (total += item));
         res.json(expense);
     }
     catch (error) {
@@ -408,7 +460,7 @@ const billsToPay = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const list = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: false,
-            transactionType: 'expense'
+            transactionType: "expense",
         }).sort({ transactionDate: 1 });
         res.json(list);
     }
@@ -426,7 +478,7 @@ const updateBillsToPay = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 transactionValue: value,
                 transactionAccount: account,
                 transactionStatus: Tstatus,
-                transactionPaymentDate: paymentDate
+                transactionPaymentDate: paymentDate,
             });
             res.json(updated);
         }
@@ -442,7 +494,7 @@ const billsToReceive = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const list = yield transactionModel_1.default.find({
             userId: req.userId,
             transactionStatus: false,
-            transactionType: 'income'
+            transactionType: "income",
         }).sort({ transactionDate: -1 });
         res.json(list);
     }
@@ -460,7 +512,7 @@ const updateBillsToReceive = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 transactionValue: value,
                 transactionAccount: account,
                 transactionStatus: Tstatus,
-                transactionPaymentDate: paymentDate
+                transactionPaymentDate: paymentDate,
             });
             res.json(updated);
         }
