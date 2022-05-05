@@ -11,6 +11,7 @@ const router = Router();
 //UserController
 router.post('/register', UserController.register);
 router.post('/login', UserController.login);
+router.post('/validateToken', UserController.validateToken);
 
 //TransactionController
 router.post('/transaction', Auth.private, TransactionController.create);
@@ -22,6 +23,8 @@ router.post('/statementIncome', Auth.private, TransactionController.getIncomeFor
 router.post('/statementExpense', Auth.private, TransactionController.getExpenseForMonth);
 router.post('/incomeProfit', Auth.private, TransactionController.getIncomeProfit);
 router.post('/expenseProfit', Auth.private, TransactionController.getExpenseProfit);
+router.put('/reverseTransaction/:id', Auth.private, TransactionController.reverseTransaction);
+router.delete('/deleteTransaction/:id', Auth.private, TransactionController.removeTransaction);
     //billsToPay
     router.get('/billsToPay', Auth.private, TransactionController.billsToPay);
     router.put('/billsToPay/:id', Auth.private, TransactionController.updateBillsToPay)
