@@ -9,7 +9,9 @@ dotenv.config()
 mongoConnect();
 const server = express();
 
-server.use(cors())
+server.use(cors({
+    origin: 'https://financas-front.vercel.app'
+}))
 
 
 server.use(express.static(path.join(__dirname, '../public')));

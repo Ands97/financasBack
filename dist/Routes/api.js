@@ -33,6 +33,7 @@ const router = (0, express_1.Router)();
 //UserController
 router.post('/register', UserController.register);
 router.post('/login', UserController.login);
+router.post('/validateToken', UserController.validateToken);
 //TransactionController
 router.post('/transaction', auth_1.Auth.private, TransactionController.create);
 router.get('/statementResume', auth_1.Auth.private, TransactionController.getStatementResume);
@@ -43,6 +44,8 @@ router.post('/statementIncome', auth_1.Auth.private, TransactionController.getIn
 router.post('/statementExpense', auth_1.Auth.private, TransactionController.getExpenseForMonth);
 router.post('/incomeProfit', auth_1.Auth.private, TransactionController.getIncomeProfit);
 router.post('/expenseProfit', auth_1.Auth.private, TransactionController.getExpenseProfit);
+router.put('/reverseTransaction/:id', auth_1.Auth.private, TransactionController.reverseTransaction);
+router.delete('/deleteTransaction/:id', auth_1.Auth.private, TransactionController.removeTransaction);
 //billsToPay
 router.get('/billsToPay', auth_1.Auth.private, TransactionController.billsToPay);
 router.put('/billsToPay/:id', auth_1.Auth.private, TransactionController.updateBillsToPay);

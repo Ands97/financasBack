@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.register = void 0;
+exports.validateToken = exports.login = exports.register = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -23,31 +23,52 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         let { name, email, password } = req.body;
         let hasUser = yield userModel_1.default.findOne({ email });
         if (!hasUser) {
-            let newUser = yield userModel_1.default.create({ name, email, password: yield bcrypt_1.default.hash(password, 10) });
+            let newUser = yield userModel_1.default.create({
+                name,
+                email,
+                password: yield bcrypt_1.default.hash(password, 10),
+            });
             const token = jsonwebtoken_1.default.sign({ id: newUser._id, name: newUser.name, email: newUser.email }, process.env.JWT_SECRET_KEY);
             res.status(201).json({ token, name });
             return;
         }
         else {
-            res.json('Email já existe');
+            res.json("Email já existe");
         }
     }
-    res.json({ error: 'Email e/ou senha não enviado!' });
+    res.json({ error: "Email e/ou senha não enviado!" });
 });
 exports.register = register;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (req.body.email && req.body.password) {
-        let { email, password } = req.body;
-        let user = yield userModel_1.default.findOne({ email });
-        let username = user === null || user === void 0 ? void 0 : user.name;
-        if (user) {
-            if (yield bcrypt_1.default.compare(password, user.password)) {
-                const token = jsonwebtoken_1.default.sign({ id: user._id, name: user.name, email: user.email }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' });
-                res.json({ status: true, token, username });
-                return;
-            }
+    const { email, password } = req.body;
+    const user = yield userModel_1.default.findOne({ email });
+    if (user) {
+        if (yield bcrypt_1.default.compare(password, user.password)) {
+            const token = jsonwebtoken_1.default.sign({
+                id: user._id,
+                name: user.name,
+                email: user.email,
+            }, process.env.JWT_SECRET_KEY, { expiresIn: "24h" });
+            res.json({ status: true, token, user });
+            return;
+        }
+        else {
+            res.json({ message: "Incorrect password", status: false });
         }
     }
-    res.json({ status: false });
+    else {
+        res.json({ message: "User not found", status: false });
+    }
 });
 exports.login = login;
+const validateToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.body.token;
+    try {
+        const data = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET_KEY);
+        res.json({ user: data });
+    }
+    catch (error) {
+        res.json(error);
+    }
+});
+exports.validateToken = validateToken;

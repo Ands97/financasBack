@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.billsId = exports.updateBillsToReceive = exports.billsToReceive = exports.updateBillsToPay = exports.billsToPay = exports.getExpenseProfit = exports.getIncomeProfit = exports.getExpenseForMonth = exports.getIncomeForMonth = exports.getStatementForMonth = exports.getExpense = exports.getIcome = exports.getStatementResume = exports.create = void 0;
+exports.billsId = exports.updateBillsToReceive = exports.billsToReceive = exports.updateBillsToPay = exports.billsToPay = exports.getExpenseProfit = exports.getIncomeProfit = exports.removeTransaction = exports.reverseTransaction = exports.getExpenseForMonth = exports.getIncomeForMonth = exports.getStatementForMonth = exports.getExpense = exports.getIcome = exports.getStatementResume = exports.create = void 0;
 const transactionModel_1 = __importDefault(require("../models/transactionModel"));
 const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -159,6 +159,7 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     userId: req.userId,
                     transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
                     transactionAccount: account,
+                    transactionStatus: true,
                 }).sort({ transactionPaymentDate: -1 });
                 res.json(statementForMonth);
             }
@@ -175,6 +176,7 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     userId: req.userId,
                     transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
                     transactionCategory: category,
+                    transactionStatus: true,
                 }).sort({ transactionPaymentDate: -1 });
                 res.json(statementForMonth);
             }
@@ -189,6 +191,7 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
             const statementForMonth = yield transactionModel_1.default.find({
                 userId: req.userId,
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
+                transactionStatus: true,
             }).sort({ transactionPaymentDate: -1 });
             res.json(statementForMonth);
         }
@@ -203,6 +206,7 @@ const getStatementForMonth = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 transactionPaymentDate: { $gte: firstDate, $lte: lastDate },
                 transactionAccount: account,
                 transactionCategory: category,
+                transactionStatus: true,
             }).sort({ transactionPaymentDate: -1 });
             res.json(statementForMonth);
         }
@@ -415,6 +419,24 @@ const getExpenseForMonth = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getExpenseForMonth = getExpenseForMonth;
+const reverseTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { Tstatus } = req.body;
+    try {
+        yield transactionModel_1.default.updateOne({ _id: id }, { transactionStatus: false });
+        res.json({});
+    }
+    catch (error) {
+        res.json(error);
+        console.log(error);
+    }
+});
+exports.reverseTransaction = reverseTransaction;
+const removeTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    yield transactionModel_1.default.findByIdAndDelete({ _id: id });
+});
+exports.removeTransaction = removeTransaction;
 //profit
 const getIncomeProfit = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const account = req.body.account;
