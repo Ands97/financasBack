@@ -1,11 +1,7 @@
 import { Schema, model, ObjectId} from "mongoose";
+import { IAccount } from "../app/interfaces/models/IAccount";
 
-type AccountType = {
-   account: string,
-   userId: ObjectId
-}
-
-const AccountSchema = new Schema<AccountType>({
+const AccountSchema = new Schema<IAccount>({
     account: {
         type: String,
         required: true

@@ -1,63 +1,83 @@
 import {Request, Response} from 'express';
+import { IAccount } from '../app/interfaces/models/IAccount';
 import Account from '../models/accountModel';
 
-export const create = async (req: Request, res: Response) => {
-    try {
-        const newAccount = await Account.create({account: req.body.title, userId: req.userId});
-        res.status(201).json({newAccount})
-    } catch (error) {
-        res.json({error})
-    }
-};
 
-export const getAccounts =async (req: Request, res: Response) => {
-    try{
-        const list = await Account.find({userId: req.userId});
-        res.json(list)
-    } catch (error) {
-        res.json({error})
-    }
-};
+class AccountController {
+    public async createAccount(req: Request, res: Response): Promise<Response>{
+        try {
+            const accountInfo = req.body;
+            if(accountInfo.lenght = 0){
+                throw new Error("Não podemos realizar a operação devido a falta de informações");
+            }
 
-export const getAccountId = async (req: Request, res: Response) => {
-    try{
-        const account = await Account.findById({_id: req.params.id});
-        res.json(account)
-    }catch(error){
-        res.json({error})
-    }
-}
+            const newAccount: IAccount = await Account.create({
+                account: accountInfo.title,
+                userId: accountInfo.userId
+            })
 
-export const updateAccount = async (req: Request, res: Response) => {
-    try {
-        const id: string = req.params.id;   
-        const title = req.body.title;
-        if(title){
-            const update = await Account.updateOne(
+            return res.status(201).json(newAccount)
+                
+        } catch (error) {
+            return res.json(error).status(500);
+        }
+    }
+
+    public async getAccounts(req: Request, res: Response): Promise<Response>{
+        try {
+            const { userId } = req.body;
+            const accounts = await Account.find({userId});
+            return res.status(200).json(accounts)
+        } catch (error) {
+            return res.json(error).status(500);
+        }
+    }
+
+    public async getAccountId(req: Request, res: Response): Promise<Response>{
+        try {
+            const { id } = req.params;
+            const account = await Account.findById({_id: id});
+
+            if(!account){
+                throw new Error("Informação não encontrada");
+            }
+
+            return res.json(account)
+        } catch (error) {
+            return res.json(error).status(500)
+        }
+    }
+
+    public async updateAccount(req: Request, res: Response): Promise<Response>{
+        try {
+            const { id } = req.params;
+            const { title } = req.body;
+
+            const account = await Account.updateOne(
                 {_id: id},
                 {account: title}
             )
-            res.json({update})
-        }else{
-            res.json({error: 'Não recebemos o título a ser atualizado!'})
-        }
-        
-    } catch (error) {
-        res.status(404)
-    }
-};
 
-export const deleteAccount = async (req: Request, res: Response) => {
-    try {
-        const id: string = req.params.id;
-        if(id){
-            const del = await Account.deleteOne({_id:id});
-            res.status(200).json({message:'deleted'})
-        }else{
-            res.json({error: 'conta não encontrada!'})
-        }
+            if(!account){
+                throw new Error("Não recebemos o título a ser atualizado!");
+            }
 
-    } catch (error) {
-        res.json({error})
+            return res.json(account)
+        } catch (error) {
+            return res.json(error).status(500)
+        }
     }
-};
+
+    public async deleteAccount(req: Request, res: Response): Promise<Response>{
+        try {
+            const { id } = req.params;
+            await Account.deleteOne({_id: id});
+            return res.json({message: 'deleted'});
+        } catch (error) {
+            return res.json(error).status(500)
+        }
+    }
+
+}
+
+export default new AccountController();

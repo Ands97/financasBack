@@ -1,22 +1,10 @@
-import express  from "express";
-import dotenv from 'dotenv'
-import {mongoConnect} from './database/mongo';
-import ApiRoutes from './Routes/api'
-import cors from 'cors';
-import path from 'path';
+import App from "./app";
+import config from "./config";
 
-dotenv.config()
-mongoConnect();
-const server = express();
+const app = new App();
 
-server.use(cors({
-    origin: 'https://financas-front.vercel.app'
-}))
+const server = app.server.listen(config.server.port, () => {
+    console.log(`Server is running on port: ${config.server.port}`)
+});
 
-
-server.use(express.static(path.join(__dirname, '../public')));
-server.use(express.json())
-server.use(express.urlencoded({extended: true}));
-server.use('/api', ApiRoutes)
-
-server.listen(process.env.PORT);
+export default server;
