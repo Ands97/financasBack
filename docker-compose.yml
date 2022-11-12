@@ -1,0 +1,36 @@
+services:
+  app:
+    image: financas-api:latest
+    container_name: financas-api
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/home/node/app
+      - ./node_modules:/home/node/app/node_modules
+      - ./.env:/home/node/app/.env
+      - ./package.json:/home/node/app/package.json
+      - ./tsconfig.json:/home/node/app/tsconfig.json
+    command: sh -c "npm run start-dev"
+    ports:
+      - "4000:4000"
+    links:
+      - "redis:redis"
+    depends_on:
+      - redis
+    tty: true
+  redis:
+    container_name: financas-api-redis
+    image: redis:6.2.6-alpine
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --save 20 1 --loglevel warning --requirepass fin@nc@s@pi
+    healthcheck:
+        test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+        interval: 30s
+        timeout: 30s
+        retries: 3
+volumes:
+  redis-data:
